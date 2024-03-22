@@ -7,6 +7,7 @@ import numpy as np
 def generate_random_mapping():  # For Test Purpose
     alphabet = string.ascii_uppercase + string.ascii_lowercase
     shuffled_alphabet = list(alphabet)
+    random.seed(0)  # For testing, kept the seed of 0
     random.shuffle(shuffled_alphabet)
 
     mapping = {}
@@ -35,8 +36,8 @@ def encrypt_text_with_random_substitution(plaintext):
 
 
 # Steps: Now do frequency analysis
-plaintext = "A monoalphabetical substitution cipher uses a fixed substitution over the entire message. The ciphertext alphabet may be a shifted, reversed, mixed or deranged version of the plaintext alphabet."
-ciphertext = encrypt_text_with_random_substitution(plaintext)
+# plaintext = "A monoalphabetical substitution cipher uses a fixed substitution over the entire message. The ciphertext alphabet may be a shifted, reversed, mixed or deranged version of the plaintext alphabet."
+# ciphertext = encrypt_text_with_random_substitution(plaintext)
 # print("Plaintext:", plaintext)
 # print("Ciphertext:", ciphertext)
 
@@ -51,7 +52,19 @@ class Decipher:
         self.frequency = self.GetFrequency(inputText)
         self.cipherText = inputText
 
-    def firstDecrypt(self,):
+    def substitute(self, firstChar: chr, secondChar: chr) -> None:
+        # use + as temp value
+        if self.cipherText:
+            self.cipherText = self.cipherText.replace(firstChar.lower(), '+')
+            self.cipherText = self.cipherText.replace(
+                secondChar.lower(), firstChar.lower())
+            self.cipherText = self.cipherText.replace('+', secondChar.lower())
+            self.cipherText = self.cipherText.replace(firstChar.upper(), '+')
+            self.cipherText = self.cipherText.replace(
+                secondChar.upper(), firstChar.upper())
+            self.cipherText = self.cipherText.replace('+', secondChar.upper())
+
+    def firstDecrypt(self):
         if (self.frequency != None):
             self.frequency = dict(sorted(self.frequency.items(),
                                          key=lambda item: item[1], reverse=True))
@@ -89,13 +102,19 @@ class Decipher:
 
 
 if __name__ == "__main__":
-    plaintext = "Dogs are often regarded as man's best friend, and for good reason. Throughout history, these loyal companions have been by our sides, offering unwavering loyalty, companionship, and love. Their innate ability to understand human emotions and respond with empathy makes them invaluable members of our families. Whether it's a playful game of fetch, a comforting snuggle on the couch, or a reassuring presence during difficult times, dogs have an uncanny knack for brightening our days and easing our burdens. Their unwavering devotion knows no bounds, as they eagerly anticipate our return home and greet us with boundless enthusiasm each time. Beyond mere companionship, dogs also serve as protectors, guardians, and service animals, selflessly devoting themselves to our well-being. From providing emotional support to assisting those with disabilities, dogs continually demonstrate their incredible capacity for understanding and compassion. In essence, the bond between humans and dogs transcends mere friendship, evolving into a profound and enduring partnership that enriches our lives in countless ways."
-    ciphertext = encrypt_text_with_random_substitution(plaintext=plaintext)
-    print(ciphertext)
+    # plaintext = "Dogs are often regarded as man's best friend, and for good reason. Throughout history, these loyal companions have been by our sides, offering unwavering loyalty, companionship, and love. Their innate ability to understand human emotions and respond with empathy makes them invaluable members of our families. Whether it's a playful game of fetch, a comforting snuggle on the couch, or a reassuring presence during difficult times, dogs have an uncanny knack for brightening our days and easing our burdens. Their unwavering devotion knows no bounds, as they eagerly anticipate our return home and greet us with boundless enthusiasm each time. Beyond mere companionship, dogs also serve as protectors, guardians, and service animals, selflessly devoting themselves to our well-being. From providing emotional support to assisting those with disabilities, dogs continually demonstrate their incredible capacity for understanding and compassion. In essence, the bond between humans and dogs transcends mere friendship, evolving into a profound and enduring partnership that enriches our lives in countless ways."
+    # ciphertext = encrypt_text_with_random_substitution(plaintext=plaintext)
+    ciphertext = "AAoo bot aaoo"
     print("\n")
     D = Decipher(ciphertext)
-    D.DisplayFreqAnalysis()
-    D.firstDecrypt()
-    D.DisplayFreqAnalysis()
+
+    D.substitute('a', 'o')
+    D.substitute('O', 'a')
+    # D.substitute('a', 'c')
 
     print(D.cipherText)
+    # D.DisplayFreqAnalysis()
+    # D.firstDecrypt()
+    # D.DisplayFreqAnalysis()
+
+    # print(D.cipherText)
