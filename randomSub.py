@@ -1,32 +1,29 @@
 import random
 import string
 import matplotlib.pyplot as plt
-import numpy as np
 
 
-def generate_random_mapping():  # For Test Purpose
-    alphabet = string.ascii_uppercase + string.ascii_lowercase
-    shuffled_alphabet = list(alphabet)
-    random.seed(0)  # For testing, kept the seed of 0
+def generate_random_mapping():
+    alphabet = list(string.ascii_uppercase)
+    shuffled_alphabet = alphabet[:]  # Create a copy of alphabet
     random.shuffle(shuffled_alphabet)
 
     mapping = {}
-    for char in string.ascii_uppercase:
-        cipher_char = shuffled_alphabet.pop()
-        mapping[char] = cipher_char.upper()
-        mapping[char.lower()] = cipher_char.lower()
-
+    for original, cipher in zip(alphabet, shuffled_alphabet):
+        mapping[original] = cipher
+    # print(mapping)
     return mapping
 
 
 def encrypt_with_random_substitution(plaintext, mapping):
     ciphertext = ""
+    print(mapping)
     for char in plaintext:
         if char in mapping:
             ciphertext += mapping[char]
+            print(mapping[char] + " " + char)
         else:
             ciphertext += char
-    # print(mapping)
     return ciphertext
 
 
@@ -35,15 +32,9 @@ def encrypt_text_with_random_substitution(plaintext):
     return encrypt_with_random_substitution(plaintext, mapping)
 
 
-# Steps: Now do frequency analysis
-# plaintext = "A monoalphabetical substitution cipher uses a fixed substitution over the entire message. The ciphertext alphabet may be a shifted, reversed, mixed or deranged version of the plaintext alphabet."
-# ciphertext = encrypt_text_with_random_substitution(plaintext)
-# print("Plaintext:", plaintext)
-# print("Ciphertext:", ciphertext)
-
-
 class Decipher:
     cipherText = None
+    MainCipherText = None
     frequency = None
     mappingOrder = ['E', 'T', 'A', 'I', 'N', 'O', 'S', 'H', 'R', 'D', 'L',
                     'U', 'C', 'M', 'F', 'W', 'Y', 'G', 'P', 'B', 'V', 'K', 'Q', 'J', 'X', 'Z']
@@ -51,35 +42,39 @@ class Decipher:
     def __init__(self, inputText) -> None:
         self.frequency = self.GetFrequency(inputText)
         self.cipherText = inputText
+        self.MainCipherText = inputText
 
     def substitute(self, firstChar: chr, secondChar: chr) -> None:
-        # use + as temp value
-        if self.cipherText:
-            self.cipherText = self.cipherText.replace(firstChar.lower(), '+')
-            self.cipherText = self.cipherText.replace(
-                secondChar.lower(), firstChar.lower())
-            self.cipherText = self.cipherText.replace('+', secondChar.lower())
-            self.cipherText = self.cipherText.replace(firstChar.upper(), '+')
-            self.cipherText = self.cipherText.replace(
-                secondChar.upper(), firstChar.upper())
-            self.cipherText = self.cipherText.replace('+', secondChar.upper())
+        if firstChar.lower() != secondChar.lower():
+            if not self.validateSwap(secondChar):
+                return
+        if self.MainCipherText:
+            substituted_text = self.cipherText  # Initialize with current ciphertext
+            for index, char in enumerate(self.MainCipherText):
+                if char == firstChar or char.lower() == firstChar.lower():
+                    if firstChar == secondChar:
+                        second_char = secondChar.upper()
+                    else:
+                        second_char = secondChar.lower()
+                    substituted_text = substituted_text[:index] + \
+                        second_char + substituted_text[index + 1:]
 
-    def firstDecrypt(self):
+            self.cipherText = substituted_text
+
+    def performDecrypt(self, step=26):
         if (self.frequency != None):
             self.frequency = dict(sorted(self.frequency.items(),
                                          key=lambda item: item[1], reverse=True))
-        for index in range(len(self.frequency.keys())):
-            if (self.cipherText):
-                # eat ~at ~et  aet
-                self.cipherText = self.cipherText.replace(
-                    self.mappingOrder[index], "~")
-                self.cipherText = self.cipherText.replace(list(self.frequency.keys())[index].lower(), self.mappingOrder[index]
-                                                          )
-                self.cipherText = self.cipherText.replace("~",
-                                                          list(self.frequency.keys())[index].lower())
 
-                print("replacing " + list(self.frequency.keys())
-                      [index] + " with " + self.mappingOrder[index])
+        orderedFreqKeys = list(self.frequency.keys())
+        for index in range(step):
+            if self.cipherText:
+                if self.frequency[orderedFreqKeys[index]] == 0:
+                    return
+                self.substitute(
+                    orderedFreqKeys[index], self.mappingOrder[index])
+                print(f"{orderedFreqKeys[index]}\
+                          --> {self.mappingOrder[index]}")
 
     def GetFrequency(self, input_text):
         frequencyTable = {key: 0 for key in string.ascii_uppercase}
@@ -100,21 +95,55 @@ class Decipher:
         plt.ylabel("Frequency")
         plt.show()
 
+    def validateSwap(self, toLetter):
+        for index, char in enumerate(self.cipherText):
+
+            if char == toLetter.lower():
+                print("index " + str(index) + " change " +
+                      self.MainCipherText[index] + " first")
+                print("Can't swap " + toLetter)
+                return False
+        return True
+
 
 if __name__ == "__main__":
-    # plaintext = "Dogs are often regarded as man's best friend, and for good reason. Throughout history, these loyal companions have been by our sides, offering unwavering loyalty, companionship, and love. Their innate ability to understand human emotions and respond with empathy makes them invaluable members of our families. Whether it's a playful game of fetch, a comforting snuggle on the couch, or a reassuring presence during difficult times, dogs have an uncanny knack for brightening our days and easing our burdens. Their unwavering devotion knows no bounds, as they eagerly anticipate our return home and greet us with boundless enthusiasm each time. Beyond mere companionship, dogs also serve as protectors, guardians, and service animals, selflessly devoting themselves to our well-being. From providing emotional support to assisting those with disabilities, dogs continually demonstrate their incredible capacity for understanding and compassion. In essence, the bond between humans and dogs transcends mere friendship, evolving into a profound and enduring partnership that enriches our lives in countless ways."
-    # ciphertext = encrypt_text_with_random_substitution(plaintext=plaintext)
-    ciphertext = "AAoo bot aaoo"
-    print("\n")
-    D = Decipher(ciphertext)
+    plaintext = """His book titled “Omnivore’s Dilemma: A Natural History of Four Meals” discusses several aspects of nature and focuses specifically on grass and what it is for animals and different people. Without grass life would have many problems, as both animals and humans very much need on it to live full lives.
 
-    D.substitute('a', 'o')
-    D.substitute('O', 'a')
-    # D.substitute('a', 'c')
+Expectations that society has is centered on food and that it is provided in abundance for stores and markets but how it gets there, no one wonders. The author starts out by making a very specific and acute observation that most people see grass as a unit, one entity that is a part and mostly, an insignificant piece of the environment comparing to the rest of nature’s objects.
 
+Walking on it every day, an individual never really stops and thinks what grass consists of and how its life processes are carried out. Michael Pollan mentions that the majority of people do not see grass the same way a cow sees it. As cows eat it every day, they have become specialists in the kinds of grass there are and what specific ones should not be eaten. A farmer also sees grass as a part of his life because he needs it for his cows to survive and his farm to prosper.
+
+The author goes on to talk about his visit to the farm and how he was explained about the different types and strands of grass. People who are closely involved with farming are also knowledgeable about grass and how to properly grow it (Pollan, 2007). The expectations that people have towards grass and what farmers think, are very different. People want to see grass on their lawn to look pretty and to cover the mud. Farmers expect grass to be well grown and full of vitamins for their live stock.
+
+Grass is a very needed and essential part of the farm and the chain of production because so many species of animals depend on it. Grass’ growth and the cows’ eating habits have many “rules and laws” that surround this food type. “The law of the second bite” is an important one to keep in mind, as the cows should not be permitted to completely eat the grass down to the root (Pollan, 2007). In case this does happen, and it mostly does, the grass becomes weakened and stops growing.
+
+After the cows have taken the first bite, grass should be left alone, as it will have a chance to replenish itself and continue healthy growth. The opposite it true because if the grass is left to grow out more than it is supposed to, the area becomes too “bushy” and cannot be used for cows. A farmer, who is taking care of his animals and their food, will rotate to make sure the animals are moved to a new patch of grass and this makes for best results for grass, animals and people (Pollan, 2007)."""
+    ciphertext = encrypt_text_with_random_substitution(
+        plaintext=plaintext.upper())
+print("\n")
+
+print(ciphertext)
+D = Decipher(ciphertext)
+# D.DisplayFreqAnalysis()
+D.performDecrypt(25)
+print("Original\n", end=" ")
+print(D.MainCipherText)
+print()
+print("Updated\n", end=" ")
+print(D.cipherText)
+print()
+print(D.frequency)
+while True:
+    swapchar = input("Swap first letter with second letter: ")
+    if (swapchar.isnumeric()):
+        break
+    c1, c2 = swapchar.split(" ")[:2]
+
+    D.substitute(c1, c2)
+
+    print("Original\n", end=" ")
+    print(D.MainCipherText)
+    print()
+    print("Updated\n", end=" ")
     print(D.cipherText)
-    # D.DisplayFreqAnalysis()
-    # D.firstDecrypt()
-    # D.DisplayFreqAnalysis()
-
-    # print(D.cipherText)
+    print()
