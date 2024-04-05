@@ -1,6 +1,8 @@
 import random
 import string
 import matplotlib.pyplot as plt
+import textwrap
+random.seed(1)
 
 
 def generate_random_mapping():
@@ -11,17 +13,17 @@ def generate_random_mapping():
     mapping = {}
     for original, cipher in zip(alphabet, shuffled_alphabet):
         mapping[original] = cipher
-    # print(mapping)
+
     return mapping
 
 
 def encrypt_with_random_substitution(plaintext, mapping):
     ciphertext = ""
-    print(mapping)
+
     for char in plaintext:
         if char in mapping:
             ciphertext += mapping[char]
-            print(mapping[char] + " " + char)
+            # print(mapping[char] + " " + char)
         else:
             ciphertext += char
     return ciphertext
@@ -41,8 +43,8 @@ class Decipher:
 
     def __init__(self, inputText) -> None:
         self.frequency = self.GetFrequency(inputText)
-        self.cipherText = inputText
-        self.MainCipherText = inputText
+        self.cipherText = textwrap.fill(inputText, width=117)
+        self.MainCipherText = textwrap.fill(inputText, width=117)
 
     def substitute(self, firstChar: chr, secondChar: chr) -> None:
         if firstChar.lower() != secondChar.lower():
@@ -59,7 +61,7 @@ class Decipher:
                     substituted_text = substituted_text[:index] + \
                         second_char + substituted_text[index + 1:]
 
-            self.cipherText = substituted_text
+            self.cipherText = textwrap.fill(substituted_text, width=117)
 
     def performDecrypt(self, step=26):
         if (self.frequency != None):
@@ -73,8 +75,8 @@ class Decipher:
                     return
                 self.substitute(
                     orderedFreqKeys[index], self.mappingOrder[index])
-                print(f"{orderedFreqKeys[index]}\
-                          --> {self.mappingOrder[index]}")
+                # print(f"{orderedFreqKeys[index]}\
+                #           --> {self.mappingOrder[index]}")
 
     def GetFrequency(self, input_text):
         frequencyTable = {key: 0 for key in string.ascii_uppercase}
@@ -122,28 +124,34 @@ After the cows have taken the first bite, grass should be left alone, as it will
         plaintext=plaintext.upper())
 print("\n")
 
-print(ciphertext)
+# print(ciphertext)
 D = Decipher(ciphertext)
 # D.DisplayFreqAnalysis()
-D.performDecrypt(25)
-print("Original\n", end=" ")
-print(D.MainCipherText)
-print()
+D.performDecrypt(26)
+# print("Original\n", end=" ")
+# print(D.MainCipherText)
+# print()
+file_path = "output.txt"
+
+# Write the text to the file
+with open(file_path, "w") as file:
+    file.write(D.MainCipherText + "\n" + str(D.frequency))
+
 print("Updated\n", end=" ")
 print(D.cipherText)
 print()
 print(D.frequency)
 while True:
-    swapchar = input("Swap first letter with second letter: ")
+    swapchar = input("Swap first letter with second letter: ").strip()
     if (swapchar.isnumeric()):
         break
-    c1, c2 = swapchar.split(" ")[:2]
+    try:
+        c1, c2 = swapchar.split(" ")[:2]
 
-    D.substitute(c1, c2)
+        D.substitute(c1, c2)
+    except:
+        continue
 
-    print("Original\n", end=" ")
-    print(D.MainCipherText)
-    print()
     print("Updated\n", end=" ")
     print(D.cipherText)
     print()
