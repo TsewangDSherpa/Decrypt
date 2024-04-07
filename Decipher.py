@@ -4,13 +4,15 @@ import matplotlib.pyplot as plt
 class Decipher:
     CipherText = None
     Frequency = None
+    OriginalCipher = None
     FrequentMappingOrder =  [
         'E', 'T', 'A', 'O', 'I', 'N', 'S', 'H', 'R', 'D', 'L', 'C', 'U', 'M',
         'W', 'F', 'G', 'Y', 'P', 'B', 'V', 'K', 'J', 'X', 'Q', 'Z']
-        
+    
     def __init__(self, cipherText) -> None:
             self.CipherText = cipherText
             self.Frequency = self.GetFrequency(cipherText)
+            self.OriginalCipher = self.CipherText
 
     def GetFrequency(self, cipherText):
         frequencyTable = {key: 0 for key in string.ascii_uppercase}
@@ -32,11 +34,33 @@ class Decipher:
         plt.show()
     
     def substitute(self, fromChar, toChar):
-         for index, char in enumerate(self.CipherText):
-              if char == fromChar.upper():
-                   self.CipherText = self.CipherText[:index] + toChar.lower() + self.CipherText[index+1:]
+         print("substituting")
+         if not self.validateSubstitution(toChar):
+                print("not validedate")
+                return
+         if self.OriginalCipher:
+            substituted_text = self.CipherText  # Initialize with current ciphertext
+            for index, char in enumerate(self.OriginalCipher):
+                if char.lower() == fromChar.lower():    
+                    second_char = toChar.lower()
+                    substituted_text = substituted_text[:index] + \
+                        second_char + substituted_text[index + 1:]
+
+            self.CipherText = substituted_text
+         
+         
 
     def swap(self, firstChar, secondChar):
+         firstChar = firstChar.lower()
+         secondChar = secondChar.lower()
+         if self.CipherText is None:
+              return
+         self.CipherText = self.CipherText.replace(firstChar.upper(), "♛")
+         self.CipherText = self.CipherText.replace(secondChar.upper(), firstChar)
+         self.CipherText = self.CipherText.replace("♛", secondChar)
+
+    def swap2(self, firstChar, secondChar):
+         print("swapping")
          firstChar = firstChar.lower()
          secondChar = secondChar.lower()
          if self.CipherText is None:
@@ -44,24 +68,25 @@ class Decipher:
          self.CipherText = self.CipherText.replace(firstChar, "♛")
          self.CipherText = self.CipherText.replace(secondChar, firstChar)
          self.CipherText = self.CipherText.replace("♛", secondChar)
-
+    
     def validateSubstitution(self, toLetter):
         for index, char in enumerate(self.CipherText):
             if char == toLetter.lower():
-                print("index " + str(index) + " change " +
-                      self.MainCipherText[index] + " first")
-                print("Can't swap " + toLetter)
+                print("Can't swap " + toLetter, end=", ")
+                print( char + " is already mapped to " +
+                      self.OriginalCipher[index])
+                
                 return False
         return True
     
     def performDecrypt(self):
-        step = 0
+        step = 26
         if (self.Frequency != None):
             self.Frequency = dict(sorted(self.Frequency.items(),
                                          key=lambda item: item[1], reverse=True))
         orderedFreqKeys = list(self.Frequency.keys())
         for index in range(step):
-            if self.CipherText:
+            if self.OriginalCipher:
                 if self.Frequency[orderedFreqKeys[index]] == 0:
                     return
                 self.substitute(
@@ -91,22 +116,24 @@ XRHAW, XU TO ITRR ZXDW X LZXALW OH MWVRWATUZ TOUWRB XAK LHAOTAPW ZWXROZS FMHIOZ.
 FMXUU TU RWBO OH FMHI HPO QHMW OZXA TO TU UPVVHUWK OH, OZW XMWX YWLHQWU OHH “YPUZS” XAK LXAAHO YW PUWK BHM LHIU. X
 BXMQWM, IZH TU OXJTAF LXMW HB ZTU XATQXRU XAK OZWTM BHHK, ITRR MHOXOW OH QXJW UPMW OZW XATQXRU XMW QHDWK OH X AWI
 VXOLZ HB FMXUU XAK OZTU QXJWU BHM YWUO MWUPROU BHM FMXUU, XATQXRU XAK VWHVRW (VHRRXA, 2007)."""
-cipher = cipher.lower()
+cipher = cipher
 
 D = Decipher(cipherText=cipher)
 # D.DisplayFreqAnalysis()
 D.performDecrypt()
-
+step = 0
 print(D.CipherText)
                 
 while True:
+    
     swapchar = input("Swap first letter with second letter: ").strip()
     if (swapchar.isnumeric()):
         break
     try:
         c1, c2 = swapchar.split(" ")[:2]
 
-        D.swap(c1, c2)
+        D.swap2(c1, c2)
+        
     except:
         continue
 
