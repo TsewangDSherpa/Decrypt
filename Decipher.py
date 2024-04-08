@@ -147,8 +147,8 @@ class DecipherApp:
         self.bottom_frame.pack(side=tk.TOP, pady=10)  # Positioned at the top
         
         # Label for mapped text
-        self.result_label = tk.Label(self.bottom_frame, text="", background="#333300" ,wraplength=screen_width - padding, font=("Helvetica", 15), justify="center")
-        self.result_label.pack(pady=10)  # Added padding of 10 pixels
+        self.result_label = tk.Label(self.bottom_frame, text="", padx=20, pady=20,  background="#444444" ,wraplength=screen_width - padding, foreground="white",font=("Helvetica", 15), justify="center")
+        self.result_label.pack(pady=10, padx=10)  # Added padding of 10 pixels
 
         # Label for mapping display
         self.mapping_label = tk.Label(self.bottom_frame, text="", font=("Arial", 14), wraplength=screen_width - 300)
@@ -181,12 +181,16 @@ class DecipherApp:
         # Handle event when user wants to open a text file
         file_path = filedialog.askopenfilename(filetypes=[("Text files", "*.txt")])
         if file_path:
-            with open(file_path, 'r') as file:
-                content = file.read().strip()
-                self.cipher_text = content.upper()
-                self.decipher = Decipher(self.cipher_text)
-                self.result_label.config(text=self.decipher.CipherText)
-                self.display_mapping()
+            try: 
+                with open(file_path, 'r', encoding='utf-8') as file:
+                    content = file.read().strip()
+                    cipher_text = content.upper()  
+                    self.decipher = Decipher(cipher_text)
+                    self.result_label.config(text=self.decipher.CipherText)
+                    self.display_mapping()
+            except UnicodeDecodeError as e:
+                print(f"UnicodeDecodeError: {e}")
+                return None   
 
     def perform_swap(self):
         # Handle event when user wants to perform character swap

@@ -78,10 +78,16 @@ class Decipher:
                     orderedFreqKeys[index], self.FrequentMappingOrder[index])
 
 def read_file(filename):
-    # Read content from a text file
-    with open(filename, 'r') as file:
-        content = file.read().strip()
-    return content
+    try:
+        with open(filename, 'r', encoding='utf-8') as file:
+            content = file.read().strip()
+            content = content.upper()
+        return content
+    except UnicodeDecodeError as e:
+        print(f"UnicodeDecodeError: {e}")
+        # Handle the error as per your requirement
+        return None
+
 
 def main():
     # Ask user whether to read from a file or enter text manually
