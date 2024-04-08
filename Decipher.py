@@ -1,7 +1,7 @@
-import string
 import tkinter as tk
 from tkinter import filedialog, messagebox, simpledialog
 import matplotlib.pyplot as plt 
+import string
 
 savingID = 1
 
@@ -146,14 +146,21 @@ class DecipherApp:
         self.bottom_frame = tk.Frame(root)
         self.bottom_frame.pack(side=tk.TOP, pady=10)  # Positioned at the top
         
-        # Label for mapped text
-        self.result_label = tk.Label(self.bottom_frame, text="", padx=20, pady=20,  background="#444444" ,wraplength=screen_width - padding, foreground="white",font=("Helvetica", 15), justify="center")
-        self.result_label.pack(pady=10, padx=10)  # Added padding of 10 pixels
+        # Add a scrollbar
+        self.scrollbar = tk.Scrollbar(self.bottom_frame)
+        self.scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
+
+        
+        # Text widget to contain the result with scrolling capability
+        self.result_text = tk.Text(self.bottom_frame, wrap=tk.WORD, width=(screen_width-400), padx=20, pady=20, font=("Helvetica", 15), bg="#444444", fg="white")
+        self.result_text.pack(expand=True, fill=tk.BOTH, anchor=tk.CENTER, padx=20)
+        self.result_text.config(yscrollcommand=self.scrollbar.set)
+        self.scrollbar.config(command=self.result_text.yview)               
+
 
         # Label for mapping display
         self.mapping_label = tk.Label(self.bottom_frame, text="", font=("Arial", 14), wraplength=screen_width - 300)
         self.mapping_label.pack(pady=10)  # Added padding of 10 pixels
-            
 
     def validate_entry(self, value):
         # Validate entry in the swap text fields
@@ -167,13 +174,13 @@ class DecipherApp:
             self.cipher_text = self.cipher_text.upper()
 
         self.decipher = Decipher(self.cipher_text)
-        self.result_label.config(text=self.decipher.CipherText)
-    
+        self.result_text.delete(1.0, tk.END)  # Clear previous text
+        self.result_text.insert(tk.END, self.decipher.CipherText)
         self.display_mapping()
 
     def enter_text(self):
         # Handle event when user wants to enter new text manually
-        self.result_label.config(text="")
+        self.result_text.delete(1.0, tk.END)  # Clear previous text
         self.mapping_label.config(text="")
         self.show_cipher_text()
 
@@ -183,10 +190,11 @@ class DecipherApp:
         if file_path:
             try: 
                 with open(file_path, 'r', encoding='utf-8') as file:
-                    content = file.read().strip()
+                    content = file.read().strip().strip("\n")
                     cipher_text = content.upper()  
                     self.decipher = Decipher(cipher_text)
-                    self.result_label.config(text=self.decipher.CipherText)
+                    self.result_text.delete(1.0, tk.END)  # Clear previous text
+                    self.result_text.insert(tk.END, self.decipher.CipherText)
                     self.display_mapping()
             except UnicodeDecodeError as e:
                 print(f"UnicodeDecodeError: {e}")
@@ -200,7 +208,8 @@ class DecipherApp:
             return
         try:
             self.decipher.swap(c1, c2)
-            self.result_label.config(text=self.decipher.CipherText)
+            self.result_text.delete(1.0, tk.END)  # Clear previous text
+            self.result_text.insert(tk.END, self.decipher.CipherText)
             self.display_mapping()
 
         except Exception as e:
