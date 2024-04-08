@@ -1,0 +1,20 @@
+Cipher Text:
+HOW ARE YOU MY FRIEND.
+
+Deciphered Text:
+how iae toc dt sareln.
+
+Mapping:
+A : R
+C : U
+D : M
+E : E
+H : H
+I : A
+L : N
+N : D
+O : O
+R : I
+S : F
+T : Y
+W : W
