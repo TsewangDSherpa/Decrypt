@@ -1,1 +1,1 @@
-### Install Tkinter on python for GUI Support. 
+### Uses Tkinter on python for GUI Support. 
