@@ -1,16 +1,1 @@
 Cipher Text:
-HELLO HOW ARE YOU
-
-Deciphered Text:
-atooe aeh int res
-
-Mapping:
-A : H
-E : O
-H : W
-I : A
-N : R
-O : L
-R : Y
-S : U
-T : E
